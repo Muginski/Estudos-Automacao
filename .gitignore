@@ -1,0 +1,28 @@
+# Boot local Dimi - nao vai pro git
+BOOT-CHECKPOINT.md
+
+# Java / RestAssured / Maven
+target/
+*.class
+*.jar
+*.log
+.mvn/
+mvnw
+mvnw.cmd
+
+# Node / Cypress
+node_modules/
+dist/
+cypress/videos/
+cypress/screenshots/
+.cypress/cache/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Env
+.env
