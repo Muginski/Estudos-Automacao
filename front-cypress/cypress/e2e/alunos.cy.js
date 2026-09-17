@@ -1,7 +1,7 @@
 /**
  * RF01 - UC01 Cadastrar Aluno (front - fluxo feliz)
  * Rastreabilidade: docs/DOCUMENTO-PRINCIPAL.md §8 RF01->UC01
- * Pirâmide Fe: front cobre só feliz + 1 borda (CPF duplicado). Bordas completas (422) ficam na API AlunosTest:64
+ * Pirâmide de testes: front cobre só feliz + 1 borda (CPF duplicado). Bordas completas (422) ficam na API AlunosTest:64
  * Objetivo: validar fluxo visual que o usuário vê (form + mensagem), não regra de validação
  */
 

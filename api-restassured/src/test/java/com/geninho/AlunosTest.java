@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.*;
 /**
  * RF01 - UC01 Cadastrar Aluno (lean)
  * Rastreabilidade: docs/DOCUMENTO-PRINCIPAL.md §8 RF01->UC01
- * Pirâmide Fe: aqui cobre 201/422/404 - front cobre só feliz
+ * Pirâmide de testes: API cobre 201/422/404 - front cobre só feliz
  * Objetivo: validar contrato da API sem depender do front
  */
 public class AlunosTest {
@@ -68,7 +68,7 @@ public class AlunosTest {
     }
 
     // RF01 - Borda/validação: API deve recusar payload sem nome (RNF01)
-    // Pirâmide Fe: este 422 fica só na API; front não precisa repetir esta borda
+    // Pirâmide: este 422 fica só na API; front não precisa repetir esta borda
     @Test
     @DisplayName("POST /alunos - 422 sem nome (validação)")
     void deveRecusarSemNome() {

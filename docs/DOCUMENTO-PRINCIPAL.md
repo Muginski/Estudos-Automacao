@@ -71,14 +71,14 @@ npm run cy:run    # headless
 - `api-restassured/src/test/resources/config.properties:1` `baseUrl=http://localhost:3000` `basePath=/api` — lido em `AlunosTest:25` e `AuthTest:23` via `RestAssured.baseURI/basePath`
 - `front-cypress/cypress.config.js:5` `baseUrl` — usado em `cy.visit` e `Cypress.config('baseUrl')`
 
-## 7. Pirâmide (Fe)
+## 7. Pirâmide de testes
 
 | Camada | Cobre | Não repete |
 |--------|-------|------------|
 | API | 201/422/401/404, validação, contrato | — |
 | Front | só feliz + 1 borda (CPF duplicado) | bordas completas ficam na API |
 
-Regra em `F:/BrainSecondary/agent/memoria/comandos.md` — não repetir teste em camadas.
+Regra: não repetir teste em camadas (bordas completas só na API).
 
 ## 8. Rastreabilidade
 
