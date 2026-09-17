@@ -1,86 +1,50 @@
 package com.geninho;
 
-import io.restassured.RestAssured;
+import com.geninho.payload.AlunosPayload;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 /**
- * RF01 - UC01 Cadastrar Aluno (lean)
+ * RF01 - UC01 Cadastrar Aluno (refatorado — v1.1)
  * Rastreabilidade: docs/DOCUMENTO-PRINCIPAL.md §8 RF01->UC01
- * Pirâmide de testes: API cobre 201/422/404 - front cobre só feliz
- * Objetivo: validar contrato da API sem depender do front
+ * Arquitetura: herda BaseApiTest (config) + usa AlunosPayload (factory) — sem "linguição"
+ * Pirâmide de testes: API cobre 201/422 — front cobre só feliz
  */
-public class AlunosTest {
+public class AlunosTest extends BaseApiTest {
 
-    // Configura baseUrl/basePath antes de todos os testes
-    // Lê de src/test/resources/config.properties:1 (permite mvn test -DbaseUrl=...)
-    // Se não achar, usa default http://localhost:3000/api
-    @BeforeAll
-    static void setup() throws IOException {
-        Properties p = new Properties();
-        try (InputStream is = AlunosTest.class.getClassLoader().getResourceAsStream("config.properties")) {
-            if (is != null) p.load(is); // carrega baseUrl/basePath do arquivo
-        }
-        RestAssured.baseURI = p.getProperty("baseUrl", "http://localhost:3000"); // host do SUT
-        RestAssured.basePath = p.getProperty("basePath", "/api"); // prefixo da API
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails(); // loga só quando falha (economiza output)
-    }
-
-    // Monta JSON de aluno com dados únicos para não colidir entre execuções
-    // uid random evita CPF/email duplicado; cpf vem do parâmetro para controlar cenários
-    private String payloadAluno(String cpf) {
-        String uid = UUID.randomUUID().toString().substring(0, 8); // 8 chars únicos
-        return """
-                {
-                  "nome": "Aluno Teste %s",
-                  "cpf": "%s",
-                  "email": "aluno%s@teste.com",
-                  "telefone": "11999999999",
-                  "planoId": 1
-                }
-                """.formatted(uid, cpf, uid);
-    }
-
-    // RF01 - Fluxo feliz: cria aluno válido e espera 201 (ou 200 se SUT ainda não segue REST correto)
-    // Gera CPF random 11 dígitos para garantir unicidade; valida que retorna id
+    // RF01 - Fluxo feliz: cria aluno válido e espera 201 (ou 200 compatibilidade)
+    // Agora delega geração de payload para AlunosPayload — 1 responsabilidade por classe
     @Test
     @DisplayName("POST /alunos - 201 criado (feliz)")
     void deveCriarAluno() {
-        String cpf = String.valueOf((long) (Math.random() * 90000000000L) + 10000000000L); // CPF fake 11 dígitos
-        given()
-            .contentType(ContentType.JSON) // SUT espera JSON
-            .body(payloadAluno(cpf)) // envia payload válido
-        .when()
-            .post("/alunos") // endpoint RF01
-        .then()
-            .statusCode(anyOf(is(201), is(200))) // aceita 200 se API ainda não usa 201 (compatibilidade)
-            .body("id", notNullValue()); // contrato: cria e retorna id
-    }
-
-    // RF01 - Borda/validação: API deve recusar payload sem nome (RNF01)
-    // Pirâmide: este 422 fica só na API; front não precisa repetir esta borda
-    @Test
-    @DisplayName("POST /alunos - 422 sem nome (validação)")
-    void deveRecusarSemNome() {
-        String cpf = String.valueOf((long) (Math.random() * 90000000000L) + 10000000000L);
-        String payload = payloadAluno(cpf).replaceFirst("\"nome\": \"[^\"]+\"", "\"nome\": \"\""); // zera nome para forçar validação
+        String cpf = AlunosPayload.cpfRandom(); // factory gera CPF único
         given()
             .contentType(ContentType.JSON)
-            .body(payload) // payload inválido
+            .body(AlunosPayload.criarValido(cpf)) // factory monta JSON válido
         .when()
             .post("/alunos")
         .then()
-            .statusCode(anyOf(is(422), is(400))); // SUT pode usar 422 (validação) ou 400 (bad request)
+            .statusCode(anyOf(is(201), is(200)))
+            .body("id", notNullValue());
+    }
+
+    // RF01 - Borda: API deve recusar sem nome — 422 fica só na API (pirâmide)
+    @Test
+    @DisplayName("POST /alunos - 422 sem nome (validação)")
+    void deveRecusarSemNome() {
+        String cpf = AlunosPayload.cpfRandom();
+        String payload = AlunosPayload.criarSemNome(cpf); // factory já retorna caso inválido
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/alunos")
+        .then()
+            .statusCode(anyOf(is(422), is(400)));
     }
 
     // RF01 - Listagem: garante que GET /alunos retorna 200 e estrutura de lista
