@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     # Se não tem SUT real, pode mockar: aqui só valida compilação se baseUrl não responder
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -38,12 +38,12 @@ jobs:
     name: front (Cypress)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
           cache-dependency-path: front-cypress/package-lock.json
 
