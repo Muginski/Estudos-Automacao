@@ -27,12 +27,11 @@ jobs:
           java-version: '17'
           cache: maven
 
-      # Tenta rodar contra localhost:3000; se SUT não existe, job falha -> gate bloqueia merge (didático)
-      - name: Run API tests
+      # Modo estudo sem SUT: só compila (verde mesmo sem localhost:3000)
+      # Quando tiver SUT real, troque para: mvn -B test -DbaseUrl=http://localhost:3000 -DbasePath=/api
+      - name: Run API tests (compile-only sem SUT)
         working-directory: api-restassured
-        run: mvn -B test -DbaseUrl=http://localhost:3000 -DbasePath=/api
-        # Para não quebrar sem SUT real durante estudo, descomente a linha abaixo e comente a de cima:
-        # run: mvn -B test-compile # só compila, não falha sem SUT
+        run: mvn -B test-compile
 
   # Job 2: Front — Cypress (Page Object). Também roda em push/PR.
   front:
@@ -52,11 +51,11 @@ jobs:
         working-directory: front-cypress
         run: npm ci
 
-      # Headless — precisa SUT em localhost:3000 ou mock; sem SUT, também bloqueia (gate)
-      - name: Run Cypress
+      # Modo estudo sem SUT: só verifica instalação (verde mesmo sem localhost:3000)
+      # Quando tiver SUT real, troque para: npm run cy:run
+      - name: Run Cypress (verify sem SUT)
         working-directory: front-cypress
-        run: npm run cy:run
-        # Sem SUT real, use: run: npx cypress verify
+        run: npx cypress verify
 
   # Job 3: Gate — só passa se api + front passarem. Protege a main.
   # No GitHub: Settings -> Branches -> Add rule -> Require status checks -> esteira / gate
